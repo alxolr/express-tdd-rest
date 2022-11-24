@@ -49,9 +49,13 @@ describe("Controller Admin", () => {
     });
 
     it("should exist the best clients route", async () => {
+      sandbox
+        .stub(JobsRepository.prototype, "findBestPayingClients")
+        .resolves([]);
+
       const response = await requester
         .get("/admin/best-clients")
-        .query({ start: new Date("2010-01-01"), end: new Date("2011-01-01") })
+        .query({ start: new Date("2022-01-01"), end: new Date("2022-12-31") })
         .set("profile_id", 1);
 
       chai.expect(response.status).to.be.equal(200);

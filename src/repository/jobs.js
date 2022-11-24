@@ -2,7 +2,7 @@ const { Contract, Job, Profile, sequelize } = require("../model");
 const { Op } = require("sequelize");
 
 class JobsRepository {
-  async findBestProfession(start, end) {
+  async findBestPayingClients(start, end, limit = 2) {
     const query = {
       where: {
         paid: 1,
@@ -14,8 +14,41 @@ class JobsRepository {
           model: Contract,
           attributes: [],
           include: [
-            { model: Profile, as: "Contractor", attributes: [] },
+            {
+              model: Profile,
+              as: "Client",
+              attributes: [],
+            },
           ],
+        },
+      ],
+      group: ["Contract.Client.id"],
+      attributes: [
+        [sequelize.col("Contract.Client.id"), "id"],
+        [sequelize.col("Contract.Client.firstName"), "firstName"],
+        [sequelize.col("Contract.Client.lastName"), "lastName"],
+        [sequelize.fn("SUM", sequelize.col("price")), "paid"],
+      ],
+      order: [[sequelize.col("paid"), "DESC"]],
+      limit,
+      raw: true,
+    };
+
+    return Job.findAll(query);
+  }
+
+  async findBestProfession(start, end) {
+    const query = {
+      where: {
+        paid: 1,
+        createdAt: { [Op.gte]: start },
+        paymentDate: { [Op.lte]: end },
+      },
+      include: [
+        {
+          model: Contract,
+          attributes: [],
+          include: [{ model: Profile, as: "Contractor", attributes: [] }],
         },
       ],
       group: ["Contract.Contractor.profession"],
