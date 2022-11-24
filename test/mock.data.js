@@ -22,3 +22,8 @@ module.exports.JobMock = {
   paymentDate: "2020-08-10T19:11:26.737Z",
   ContractId: 1,
 };
+
+module.exports.BestProfessionMock = {
+  profession: "Programmer",
+  total: 663,
+};

@@ -17,6 +17,7 @@ class PaymentService {
           job.Contract.Client.balance -= job.price;
           job.Contract.Contractor.balance += job.price;
           job.paid = 1;
+          job.paymentDay = new Date();
 
           await Promise.all([
             job.Contract.Client.save(),
