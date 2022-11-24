@@ -1,12 +1,13 @@
 const { createSandbox } = require("sinon");
 const chai = require("chai");
 const app = require("../../src/app");
+
 const { ProfileMock, ContractMock } = require("../mock.data");
-const { Op } = require("sequelize");
+const { ContractsRepository } = require("../../src/repository/contracts");
 
 chai.use(require("chai-http"));
 
-const { Profile, Contract } = app.get("models");
+const { Profile } = app.get("models");
 
 describe("Controller Contracts", () => {
   let sandbox;
@@ -14,6 +15,10 @@ describe("Controller Contracts", () => {
 
   before(() => {
     sandbox = createSandbox();
+  });
+
+  beforeEach(() => {
+    sandbox.stub(Profile, "findOne").resolves(ProfileMock);
   });
 
   after(() => {
@@ -25,8 +30,9 @@ describe("Controller Contracts", () => {
       sandbox.restore();
     });
     it("should exist the get contract by id route", async () => {
-      sandbox.stub(Contract, "findOne").resolves(ContractMock);
-      sandbox.stub(Profile, "findOne").resolves(ProfileMock);
+      sandbox
+        .stub(ContractsRepository.prototype, "findContractOwnedBy")
+        .resolves(ContractMock);
 
       let response = await requester.get("/contracts/1").set("profile_id", 1);
 
@@ -41,8 +47,9 @@ describe("Controller Contracts", () => {
     });
 
     it("should exist the list contracts route", async () => {
-      sandbox.stub(Contract, "findAll").resolves([ContractMock]);
-      sandbox.stub(Profile, "findOne").resolves(ProfileMock);
+      sandbox
+        .stub(ContractsRepository.prototype, "listNonTerminatedContracts")
+        .resolves([ContractMock]);
 
       const response = await requester.get("/contracts").set("profile_id", 1);
 
