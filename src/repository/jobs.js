@@ -2,7 +2,7 @@ const { Contract, Job, Profile, sequelize } = require("../model");
 const { Op } = require("sequelize");
 
 class JobsRepository {
-  async getTotalJobsCost(clientId) {
+  async getTotalJobsCost(clientId, trx) {
     const query = {
       where: {
         paid: { [Op.is]: null },
@@ -11,22 +11,25 @@ class JobsRepository {
         {
           model: Contract,
           required: true,
-          attributes: ["ClientId"],
+          attributes: [],
+          where: {
+            ClientId: clientId,
+          },
           include: [
             {
               model: Profile,
               as: "Client",
               required: true,
-              where: { "$Profile.ClientId$": clientId },
+              attributes: [],
             },
           ],
         },
       ],
-      attributes: [sequelize.fn("SUM", sequelize.col("price"))],
+      attributes: [[sequelize.fn("SUM", sequelize.col("price")), "total"]],
       raw: true,
     };
 
-    return Job.findAll(query);
+    return Job.findOne(query, { transaction: trx });
   }
 
   async getUnpaidJobs(profileId) {

@@ -1,13 +1,17 @@
+const { DepositService } = require("../service/deposit");
+
 const router = require("express").Router();
 
-router.post("/deposit/:userId", async (req, res, next) => {
-  const { userId } = req.params;
+const depositService = new DepositService();
+
+router.post("/deposit/:clientId", async (req, res, next) => {
+  const { clientId } = req.params;
   const { amount } = req.body;
 
   try {
-    const transaction = 
+    await depositService.deposit(clientId, amount);
 
-    res.end();
+    res.status(204).end();
   } catch (err) {
     next(err);
   }
